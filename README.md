@@ -96,4 +96,4 @@ static host. No environment variables, no backend.
 
 ## Status
 
-MVP complete. Factory run #79 (2026-10-17, 13:00 slot).
+MVP complete. Factory run #81 (2026-10-17, 13:00 slot).
