@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Result Analyzer BD &#8212; SSC/HSC GPA Calculator</title>
+<meta name="description" content="Offline bilingual SSC/HSC result analyzer for Bangladesh: GPA with the 4th-subject rule, what-if simulator and target-GPA planner.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo" aria-hidden="true">&#127891;</span>
+    <div>
+      <h1 data-i18n="appTitle">Result Analyzer BD</h1>
+      <p class="tagline" data-i18n="tagline">SSC / HSC GPA with the 4th-subject rule</p>
+    </div>
+  </div>
+  <button id="langBtn" class="btn btn-outline" type="button">&#2476;&#2494;&#2434;&#2482;&#2494;</button>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Sections">
+  <button class="tab active" data-tab="result" role="tab" aria-selected="true" data-i18n="tabResult">Result</button>
+  <button class="tab" data-tab="sheets" role="tab" aria-selected="false" data-i18n="tabSheets">Sheets</button>
+  <button class="tab" data-tab="data" role="tab" aria-selected="false" data-i18n="tabData">Data</button>
+</nav>
+
+<main>
+  <!-- RESULT TAB -->
+  <section id="tab-result" class="panel" role="tabpanel">
+    <div class="sheet-row">
+      <label for="sheetSelect" data-i18n="sheet">Result sheet</label>
+      <select id="sheetSelect"></select>
+      <span id="groupBadge" class="badge"></span>
+    </div>
+
+    <div class="cards" id="summaryCards">
+      <div class="card big"><div class="card-label" data-i18n="gpa">GPA</div><div class="card-value" id="gpaVal">&#8212;</div><div class="card-sub" id="gpaGrade">&#8212;</div></div>
+      <div class="card"><div class="card-label" data-i18n="status">Status</div><div class="card-value" id="statusVal">&#8212;</div><div class="card-sub" id="goldenVal"></div></div>
+      <div class="card"><div class="card-label" data-i18n="totalMarks">Total marks</div><div class="card-value" id="totalVal">&#8212;</div><div class="card-sub" id="enteredVal"></div></div>
+      <div class="card"><div class="card-label" data-i18n="average">Average</div><div class="card-value" id="avgVal">&#8212;</div><div class="card-sub" id="distVal"></div></div>
+    </div>
+
+    <p id="failNote" class="alert hidden"></p>
+    <p id="emptyNote" class="muted"></p>
+
+    <h2 data-i18n="subjects">Subjects</h2>
+    <div class="table-wrap">
+      <table id="subjectTable">
+        <thead>
+          <tr>
+            <th data-i18n="colSubject">Subject</th>
+            <th data-i18n="colMarks">Marks</th>
+            <th data-i18n="colGrade">Grade</th>
+            <th data-i18n="colPoint">Point</th>
+            <th data-i18n="colFourth">4th?</th>
+            <th data-i18n="colAction">Action</th>
+          </tr>
+        </thead>
+        <tbody id="subjectBody"></tbody>
+      </table>
+    </div>
+
+    <form id="addForm" class="add-form" novalidate>
+      <div class="field">
+        <label for="subName" data-i18n="subjectName">Subject name</label>
+        <input id="subName" type="text" maxlength="60" autocomplete="off" placeholder="e.g. Mathematics">
+      </div>
+      <div class="field">
+        <label for="subMarks" data-i18n="marks">Marks (0&#8211;100)</label>
+        <input id="subMarks" type="number" min="0" max="100" step="0.01" inputmode="decimal" placeholder="0&#8211;100">
+      </div>
+      <label class="check"><input id="subFourth" type="checkbox"> <span data-i18n="fourthSubject">4th (optional) subject</span></label>
+      <button class="btn btn-primary" type="submit" data-i18n="addSubject">Add subject</button>
+      <p id="addError" class="error hidden" role="alert"></p>
+    </form>
+
+    <div class="presets">
+      <span data-i18n="loadPreset">Load subject preset:</span>
+      <button class="btn btn-small" type="button" data-preset="science" data-i18n="science">Science</button>
+      <button class="btn btn-small" type="button" data-preset="commerce" data-i18n="commerce">Commerce</button>
+      <button class="btn btn-small" type="button" data-preset="arts" data-i18n="arts">Arts</button>
+      <span class="muted" data-i18n="presetNote">Replaces subjects in this sheet; marks stay blank until you enter them.</span>
+    </div>
+
+    <div class="two-col">
+      <section class="box">
+        <h2 data-i18n="whatIf">What-if simulator</h2>
+        <label for="wiSubject" data-i18n="wiPick">Subject</label>
+        <select id="wiSubject"></select>
+        <label for="wiMarks" data-i18n="wiMarks">New marks (0&#8211;100)</label>
+        <input id="wiMarks" type="number" min="0" max="100" step="0.01" inputmode="decimal">
+        <button id="wiBtn" class="btn btn-primary" type="button" data-i18n="wiRun">Simulate</button>
+        <p id="wiOut" class="muted" data-i18n="wiHint">Pick a subject and try different marks to see the GPA change &#8212; nothing is saved.</p>
+      </section>
+      <section class="box">
+        <h2 data-i18n="target">Target GPA planner</h2>
+        <label for="tgTarget" data-i18n="tgTarget">Target GPA (0&#8211;5)</label>
+        <input id="tgTarget" type="number" min="0" max="5" step="0.01" inputmode="decimal" value="5">
+        <label for="tgRemaining" data-i18n="tgRemaining">Subjects still to be entered</label>
+        <input id="tgRemaining" type="number" min="1" max="20" step="1" inputmode="numeric" value="1">
+        <button id="tgBtn" class="btn btn-primary" type="button" data-i18n="tgRun">Calculate</button>
+        <p id="tgOut" class="muted" data-i18n="tgHint">Shows the average marks band your remaining subjects need.</p>
+      </section>
+    </div>
+
+    <details class="box">
+      <summary data-i18n="howTitle">How GPA is calculated (BD board rules)</summary>
+      <p data-i18n="howBody">Marks map to grades: 80+ A+ (5.00), 70&#8211;79 A (4.00), 60&#8211;69 A&#8722; (3.50), 50&#8211;59 B (3.00), 40&#8211;49 C (2.00), 33&#8211;39 D (1.00), below 33 F (0). GPA = (sum of compulsory grade points + any 4th-subject points above 2.00) &#247; number of compulsory subjects, capped at 5.00. Failing any compulsory subject fails the whole result; failing the 4th subject does not. Golden A+ means A+ in every subject including the 4th.</p>
+    </details>
+  </section>
+
+  <!-- SHEETS TAB -->
+  <section id="tab-sheets" class="panel hidden" role="tabpanel">
+    <h2 data-i18n="sheetsTitle">Result sheets</h2>
+    <ul id="sheetList" class="sheet-list"></ul>
+    <form id="newSheetForm" class="add-form" novalidate>
+      <div class="field">
+        <label for="sheetName" data-i18n="sheetName">New sheet name</label>
+        <input id="sheetName" type="text" maxlength="80" autocomplete="off" placeholder="e.g. SSC Test Exam">
+      </div>
+      <div class="field">
+        <label for="sheetGroup" data-i18n="group">Group</label>
+        <select id="sheetGroup">
+          <option value="science" data-i18n="science">Science</option>
+          <option value="commerce" data-i18n="commerce">Commerce</option>
+          <option value="arts" data-i18n="arts">Arts</option>
+          <option value="other" data-i18n="other">Other</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" type="submit" data-i18n="createSheet">Create sheet</button>
+      <p id="sheetError" class="error hidden" role="alert"></p>
+    </form>
+  </section>
+
+  <!-- DATA TAB -->
+  <section id="tab-data" class="panel hidden" role="tabpanel">
+    <h2 data-i18n="dataTitle">Backup &amp; restore</h2>
+    <button id="exportBtn" class="btn btn-primary" type="button" data-i18n="export">Export JSON</button>
+    <div class="field">
+      <label for="importFile" data-i18n="importFile">Import JSON file</label>
+      <input id="importFile" type="file" accept=".json,application/json">
+    </div>
+    <div class="field">
+      <label for="importText" data-i18n="importPaste">Or paste exported JSON</label>
+      <textarea id="importText" rows="6" placeholder='{"app":"result-analyzer-bd",...}'></textarea>
+    </div>
+    <button id="importBtn" class="btn btn-primary" type="button" data-i18n="import">Import</button>
+    <p id="importMsg" class="muted" role="status"></p>
+    <hr>
+    <h2 data-i18n="eraseTitle">Erase everything</h2>
+    <p class="muted" data-i18n="eraseHint">Type DELETE to erase all sheets and start over. This cannot be undone.</p>
+    <label for="eraseInput" data-i18n="eraseLabel">Type DELETE</label>
+    <input id="eraseInput" type="text" autocomplete="off">
+    <button id="eraseBtn" class="btn btn-danger" type="button" data-i18n="eraseBtn">Erase all data</button>
+    <p id="eraseMsg" class="muted" role="status"></p>
+  </section>
+</main>
+
+<footer>
+  <p data-i18n="footer1">Offline personal tool. Your data stays in this browser (localStorage). Not affiliated with any education board.</p>
+  <p data-i18n="footer2">GPA rules follow the standard Bangladesh SSC/HSC board grading system. Verify official results with your board.</p>
+</footer>
+
+<script src="js/logic.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
